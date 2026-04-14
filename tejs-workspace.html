@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tej's Workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+
+<style>
+  /* ===== CSS VARIABLES & RESET ===== */
+  :root {
+    --bg-deep:        #0d0a08;
+    --bg-base:        #130f0b;
+    --bg-card:        #1c1510;
+    --bg-elevated:    #241a12;
+    --bg-surface:     #2e2118;
+
+    --brown-deep:     #3d2410;
+    --brown-mid:      #7a4a20;
+    --brown-warm:     #a06030;
+    --brown-glow:     #c87d42;
+    --brown-light:    #d9a070;
+
+    --silver-dim:     #6b7280;
+    --silver-mid:     #9ca3af;
+    --silver-bright:  #c8d0da;
+    --silver-shine:   #e8edf2;
+    --silver-pure:    #f5f7fa;
+
+    --accent-gold:    #c9a84c;
+    --accent-amber:   #e08020;
+    --text-primary:   #ede8e0;
+    --text-secondary: #a89880;
+    --text-muted:     #6a5a48;
+    --border-subtle:  rgba(200,160,100,0.12);
+    --border-mid:     rgba(200,160,100,0.25);
+    --border-bright:  rgba(200,160,100,0.45);
+    --shadow-deep:    0 20px 60px rgba(0,0,0,0.7);
+    --shadow-card:    0 8px 32px rgba(0,0,0,0.5);
+    --radius-sm:      6px;
+    --radius-md:      12px;
+    --radius-lg:      18px;
+    --radius-xl:      24px;
+    --transition:     all 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* Pink theme for Habit Tracker */
+  .habit-section {
+    --section-bg:     #fff5f8;
+    --section-card:   #ffffff;
+    --section-border: #f9c4d6;
+    --section-text:   #4a2030;
+    --section-muted:  #9b6070;
+    --section-accent: #e0728a;
+    --section-accent2:#f5a3bb;
+    --progress-bg:    #fde8ee;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Crimson Pro', Georgia, serif;
+    background: var(--bg-deep);
+    color: var(--text-primary);
+    min-height: 100vh;
+    overflow-x: hidden;
+    line-height: 1.6;
+  }
+
+  /* ===== BACKGROUND TEXTURE ===== */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(120,80,30,0.015) 60px, rgba(120,80,30,0.015) 61px),
+      repeating-linear-gradient(90deg, transparent, transparent 60px, rgba(120,80,30,0.015) 60px, rgba(120,80,30,0.015) 61px);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg-base); }
+  ::-webkit-scrollbar-thumb { background: var(--brown-mid); border-radius: 3px; }
+
+  /* ===== LAYOUT WRAPPERS ===== */
+  .app-wrapper { position: relative; z-index: 1; min-height: 100vh; }
+
+  /* ===== GLOBAL NAV / HEADER ===== */
+  .global-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(13,10,8,0.92);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid var(--border-subtle);
+    padding: 0 2rem;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-logo {
+    font-family: 'Cinzel', serif;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    color: var(--brown-light);
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .header-logo:hover { color: var(--silver-shine); }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-sm);
+    color: var(--text-secondary);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: var(--transition);
+  }
+  .back-btn.visible { display: flex; }
+  .back-btn:hover {
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    border-color: var(--border-bright);
+  }
+  .back-btn svg { width: 14px; height: 14px; }
+
+  /* Theme switcher */
+  .theme-switcher {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .theme-dot {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+    position: relative;
+  }
+  .theme-dot:hover, .theme-dot.active {
+    border-color: var(--silver-bright);
+    transform: scale(1.2);
+  }
+  .theme-dot[data-theme="default"] { background: linear-gradient(135deg, #7a4a20, #c8d0da); }
+  .theme-dot[data-theme="slate"]   { background: linear-gradient(135deg, #1e3a5f, #7ea8d4); }
+  .theme-dot[data-theme="forest"]  { background: linear-gradient(135deg, #1a3a1a, #7ab87a); }
+  .theme-dot[data-theme="rose"]    { background: linear-gradient(135deg, #3a1a2a, #c87a9a); }
+
+  /* ===== PAGES ===== */
+  .page { display: none; animation: pageFadeIn 0.5s ease; }
+  .page.active { display: block; }
+
+  @keyframes pageFadeIn {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== HOME PAGE ===== */
+  .home-hero {
+    text-align: center;
+    padding: 5rem 2rem 3rem;
+    position: relative;
+  }
+
+  .home-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 600px; height: 400px;
+    background: radial-gradient(ellipse at center, rgba(122,74,32,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .workspace-title {
+    font-family: 'Cinzel', serif;
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    line-height: 1.1;
+    margin-bottom: 0.75rem;
+    background: linear-gradient(135deg, var(--brown-light) 0%, var(--silver-shine) 50%, var(--brown-glow) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .workspace-tagline {
+    font-family: 'Crimson Pro', serif;
+    font-style: italic;
+    font-size: 1.15rem;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    margin-bottom: 3.5rem;
+  }
+
+  /* ===== BOOK GRID ===== */
+  .books-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.75rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem 4rem;
+  }
+
+  /* ===== BOOK CARD ===== */
+  .book-card {
+    position: relative;
+    cursor: pointer;
+    aspect-ratio: 3/4;
+    min-height: 280px;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease;
+    transform-style: preserve-3d;
+  }
+
+  .book-card:hover {
+    transform: translateY(-12px) rotate(-1deg) scale(1.02);
+    box-shadow: 0 32px 64px rgba(0,0,0,0.6), 0 0 0 1px var(--border-bright);
+  }
+
+  .book-card-inner {
+    width: 100%; height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 1.5rem;
+    position: relative;
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-lg);
+    transition: var(--transition);
+  }
+
+  /* Book spine accent */
+  .book-card-inner::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 10px;
+    border-radius: var(--radius-lg) 0 0 var(--radius-lg);
+    transition: var(--transition);
+  }
+
+  /* Individual book colors */
+  .book-gratitude .book-card-inner {
+    background: linear-gradient(160deg, #1e1209 0%, #2e1c0e 40%, #1a0f08 100%);
+  }
+  .book-gratitude .book-card-inner::before { background: linear-gradient(180deg, #c9a84c, #7a5820); }
+
+  .book-habit .book-card-inner {
+    background: linear-gradient(160deg, #1a0e14 0%, #2a1520 40%, #160b10 100%);
+  }
+  .book-habit .book-card-inner::before { background: linear-gradient(180deg, #e89ab8, #8a4060); }
+
+  .book-ideas .book-card-inner {
+    background: linear-gradient(160deg, #0e1620 0%, #142030 40%, #0a1018 100%);
+  }
+  .book-ideas .book-card-inner::before { background: linear-gradient(180deg, #70aadc, #304878); }
+
+  .book-research .book-card-inner {
+    background: linear-gradient(160deg, #0d1a0e 0%, #142018 40%, #091008 100%);
+  }
+  .book-research .book-card-inner::before { background: linear-gradient(180deg, #78c88a, #305838); }
+
+  .book-diary .book-card-inner {
+    background: linear-gradient(160deg, #160d1a 0%, #221030 40%, #100810 100%);
+  }
+  .book-diary .book-card-inner::before { background: linear-gradient(180deg, #c080e0, #602890); }
+
+  /* Book texture lines */
+  .book-card-inner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 28px,
+      rgba(255,255,255,0.025) 28px,
+      rgba(255,255,255,0.025) 29px
+    );
+    border-radius: inherit;
+    pointer-events: none;
+  }
+
+  .book-icon {
+    font-size: 2.8rem;
+    margin-bottom: 0.75rem;
+    display: block;
+    filter: drop-shadow(0 2px 8px rgba(0,0,0,0.5));
+  }
+
+  .book-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    color: var(--silver-shine);
+    margin-bottom: 0.3rem;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  }
+
+  .book-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.4;
+  }
+
+  .book-count-badge {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--border-mid);
+    border-radius: 20px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary);
+    z-index: 2;
+  }
+
+  /* ===== SECTION PAGES ===== */
+  .section-page {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem 4rem;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .section-icon { font-size: 2rem; }
+
+  .section-title {
+    font-family: 'Cinzel', serif;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    background: linear-gradient(135deg, var(--brown-light), var(--silver-shine));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .section-subtitle {
+    font-style: italic;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 2px;
+  }
+
+  /* ===== INPUT CONTROLS ===== */
+  .input-area {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-mid);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    transition: var(--transition);
+  }
+  .input-area:focus-within {
+    border-color: var(--border-bright);
+    box-shadow: 0 0 0 3px rgba(200,160,100,0.08);
+  }
+
+  .input-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  textarea,
+  select {
+    width: 100%;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-sm);
+    padding: 0.7rem 1rem;
+    color: var(--text-primary);
+    font-family: 'Crimson Pro', serif;
+    font-size: 1rem;
+    outline: none;
+    transition: var(--transition);
+    resize: none;
+  }
+
+  input[type="text"]:focus,
+  input[type="date"]:focus,
+  textarea:focus,
+  select:focus {
+    border-color: var(--border-bright);
+    background: var(--bg-elevated);
+  }
+
+  input[type="text"]::placeholder,
+  textarea::placeholder { color: var(--text-muted); }
+
+  textarea { min-height: 120px; line-height: 1.7; }
+
+  /* ===== BUTTONS ===== */
+  .btn {
+    padding: 0.6rem 1.4rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-mid);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: 'Crimson Pro', serif;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+  }
+  .btn:hover {
+    background: var(--bg-surface);
+    border-color: var(--border-bright);
+    transform: translateY(-1px);
+  }
+  .btn:active { transform: translateY(0); }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--brown-mid), var(--brown-warm));
+    border-color: var(--brown-glow);
+    color: var(--silver-pure);
+    font-weight: 600;
+  }
+  .btn-primary:hover {
+    background: linear-gradient(135deg, var(--brown-warm), var(--brown-glow));
+    box-shadow: 0 4px 16px rgba(160,96,48,0.35);
+  }
+
+  .btn-danger {
+    border-color: rgba(180,60,60,0.4);
+    color: #e08080;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+  }
+  .btn-danger:hover {
+    background: rgba(180,60,60,0.12);
+    border-color: rgba(180,60,60,0.7);
+  }
+
+  /* ===== ENTRIES LIST ===== */
+  .entries-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .entry-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    position: relative;
+    transition: var(--transition);
+    animation: entryAppear 0.4s ease;
+  }
+  .entry-card:hover {
+    border-color: var(--border-mid);
+    background: var(--bg-elevated);
+  }
+
+  @keyframes entryAppear {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .entry-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.05em;
+  }
+
+  .entry-text {
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    line-height: 1.65;
+    white-space: pre-wrap;
+  }
+
+  .entry-actions {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    opacity: 0;
+    transition: var(--transition);
+  }
+  .entry-card:hover .entry-actions { opacity: 1; }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--text-muted);
+    font-style: italic;
+    font-size: 1.05rem;
+  }
+  .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; display: block; opacity: 0.5; }
+
+  /* ===== SECTION LABELS ===== */
+  .section-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+    margin-top: 0.25rem;
+  }
+
+  /* ===== GRATITUDE ===== */
+  #page-gratitude .section-title { background: linear-gradient(135deg, #c9a84c, #e8d898); -webkit-background-clip: text; background-clip: text; }
+
+  /* ===== HABIT TRACKER ===== */
+  #page-habit {
+    background: var(--section-bg);
+    min-height: calc(100vh - 60px);
+  }
+  #page-habit .section-page { color: var(--section-text); }
+  #page-habit .section-title {
+    background: linear-gradient(135deg, #d45a80, #f0a0c0);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  #page-habit .section-header { border-color: var(--section-border); }
+  #page-habit .section-label { color: var(--section-muted); }
+
+  #page-habit .input-area {
+    background: var(--section-card);
+    border-color: var(--section-border);
+    box-shadow: 0 2px 12px rgba(200,100,140,0.08);
+  }
+  #page-habit .input-area:focus-within {
+    border-color: var(--section-accent);
+    box-shadow: 0 0 0 3px rgba(224,114,138,0.12);
+  }
+
+  #page-habit input[type="text"],
+  #page-habit input[type="date"],
+  #page-habit textarea,
+  #page-habit select {
+    background: #fff8fb;
+    border-color: var(--section-border);
+    color: var(--section-text);
+  }
+  #page-habit input[type="text"]::placeholder { color: #c0a0b0; }
+  #page-habit input[type="text"]:focus,
+  #page-habit textarea:focus { border-color: var(--section-accent); background: #fff; }
+
+  #page-habit .btn-primary {
+    background: linear-gradient(135deg, #d45a80, #e890b0);
+    border-color: #e07090;
+    color: #fff;
+  }
+  #page-habit .btn-primary:hover {
+    background: linear-gradient(135deg, #c04870, #d880a0);
+    box-shadow: 0 4px 16px rgba(212,90,128,0.35);
+  }
+  #page-habit .btn { border-color: var(--section-border); color: var(--section-text); }
+  #page-habit .btn:hover { background: #fde8ee; }
+
+  /* Habit items */
+  .habits-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .habit-item {
+    background: var(--section-card);
+    border: 1px solid var(--section-border);
+    border-radius: 50px;
+    padding: 0.65rem 1rem 0.65rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    transition: var(--transition);
+    animation: entryAppear 0.3s ease;
+  }
+  .habit-item.completed {
+    background: #fff0f5;
+    border-color: #f0c0d0;
+  }
+
+  .habit-checkbox {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--section-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: var(--transition);
+    background: #fff;
+  }
+  .habit-item.completed .habit-checkbox {
+    background: var(--section-accent);
+    border-color: var(--section-accent);
+    color: #fff;
+  }
+  .habit-checkbox::after { content: ''; }
+  .habit-item.completed .habit-checkbox::after { content: '✓'; font-size: 13px; color: #fff; font-weight: 700; }
+
+  .habit-name {
+    flex: 1;
+    font-size: 1rem;
+    color: var(--section-text);
+    transition: var(--transition);
+  }
+  .habit-item.completed .habit-name {
+    text-decoration: line-through;
+    color: var(--section-muted);
+  }
+
+  .habit-streak {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.78rem;
+    color: var(--section-accent);
+    background: #fde8ee;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+
+  /* Progress bar */
+  .progress-section {
+    background: var(--section-card);
+    border: 1px solid var(--section-border);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--section-muted);
+  }
+
+  .progress-pct {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--section-accent);
+  }
+
+  .progress-bar-track {
+    height: 8px;
+    background: var(--progress-bg);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f0a0c0, #d45a80);
+    border-radius: 4px;
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ===== IDEAS BOOK ===== */
+  #page-ideas .section-title {
+    background: linear-gradient(135deg, #70aadc, #b0d8f8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .ideas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .idea-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.1rem;
+    position: relative;
+    transition: var(--transition);
+    animation: entryAppear 0.35s ease;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .idea-card:hover {
+    border-color: var(--border-mid);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  .idea-card-text { font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); margin-bottom: 0.5rem; }
+  .idea-card-footer { display: flex; justify-content: space-between; align-items: center; }
+  .idea-tag {
+    font-size: 0.72rem;
+    background: rgba(112,170,220,0.15);
+    border: 1px solid rgba(112,170,220,0.25);
+    color: #7ab0d8;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ===== RESEARCH BOOK ===== */
+  #page-research .section-title {
+    background: linear-gradient(135deg, #78c88a, #b8f0c8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .research-entry {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-bottom: 0.85rem;
+    transition: var(--transition);
+    animation: entryAppear 0.4s ease;
+  }
+  .research-entry:hover {
+    border-color: rgba(120,200,138,0.3);
+    background: var(--bg-elevated);
+  }
+
+  .research-topic {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+    color: #78c88a;
+    margin-bottom: 0.5rem;
+  }
+
+  .research-notes { font-size: 0.95rem; color: var(--text-secondary); line-height: 1.65; white-space: pre-wrap; }
+
+  /* ===== PERSONAL DIARY ===== */
+  #page-diary .section-title {
+    background: linear-gradient(135deg, #c080e0, #e0b8f8);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .diary-date-nav {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .diary-date-pill {
+    padding: 4px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border-subtle);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: var(--transition);
+    background: var(--bg-card);
+  }
+  .diary-date-pill:hover, .diary-date-pill.selected {
+    background: rgba(192,128,224,0.12);
+    border-color: rgba(192,128,224,0.4);
+    color: #c080e0;
+  }
+
+  .diary-entry-display {
+    background: var(--bg-card);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    padding: 1.25rem;
+    margin-top: 1rem;
+    min-height: 80px;
+    font-size: 1rem;
+    line-height: 1.8;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    animation: entryAppear 0.35s ease;
+  }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-bright);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1.25rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-card);
+    z-index: 999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    max-width: 280px;
+    pointer-events: none;
+  }
+  .toast.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* ===== DIVIDER ===== */
+  .divider {
+    height: 1px;
+    background: var(--border-subtle);
+    margin: 1.25rem 0;
+  }
+
+  /* ===== RESPONSIVE ===== */
+  @media (max-width: 600px) {
+    .home-hero { padding: 3rem 1rem 2rem; }
+    .books-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; padding: 0 1rem 3rem; }
+    .book-card { min-height: 200px; }
+    .section-page { padding: 1.5rem 1rem 3rem; }
+    .global-header { padding: 0 1rem; }
+    .ideas-grid { grid-template-columns: 1fr; }
+  }
+
+  /* ===== THEME OVERRIDES ===== */
+  body.theme-slate {
+    --brown-mid:   #2a4a7a;
+    --brown-warm:  #3a6aaa;
+    --brown-glow:  #5090d0;
+    --brown-light: #80b8e8;
+    --border-mid:  rgba(80,144,208,0.25);
+    --border-bright: rgba(80,144,208,0.45);
+  }
+  body.theme-forest {
+    --brown-mid:   #245c24;
+    --brown-warm:  #348434;
+    --brown-glow:  #54a454;
+    --brown-light: #84c484;
+    --border-mid:  rgba(84,164,84,0.25);
+    --border-bright: rgba(84,164,84,0.45);
+  }
+  body.theme-rose {
+    --brown-mid:   #7a2448;
+    --brown-warm:  #aa3468;
+    --brown-glow:  #d05090;
+    --brown-light: #e888b8;
+    --border-mid:  rgba(208,80,144,0.25);
+    --border-bright: rgba(208,80,144,0.45);
+  }
+
+  /* Color customizer for books */
+  .color-customizer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .color-customizer label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+  }
+  .color-swatch {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: var(--transition);
+  }
+  .color-swatch:hover, .color-swatch.selected {
+    border-color: var(--silver-bright);
+    transform: scale(1.2);
+  }
+</style>
+</head>
+
+<body>
+<div class="app-wrapper">
+
+  <!-- GLOBAL HEADER -->
+  <header class="global-header">
+    <div class="header-logo" onclick="goHome()">Tej's Workspace</div>
+    <div class="header-right">
+      <!-- Theme Switcher -->
+      <div class="theme-switcher" title="Switch theme">
+        <div class="theme-dot active" data-theme="default" onclick="setTheme('default',this)" title="Brown & Silver"></div>
+        <div class="theme-dot" data-theme="slate"   onclick="setTheme('slate',this)"   title="Slate Blue"></div>
+        <div class="theme-dot" data-theme="forest"  onclick="setTheme('forest',this)"  title="Forest Green"></div>
+        <div class="theme-dot" data-theme="rose"    onclick="setTheme('rose',this)"    title="Deep Rose"></div>
+      </div>
+      <!-- Back Button -->
+      <button class="back-btn" id="backBtn" onclick="goHome()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M10 3L5 8l5 5"/>
+        </svg>
+        Home
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== HOME PAGE ========== -->
+  <div id="page-home" class="page active">
+    <div class="home-hero">
+      <h1 class="workspace-title">Tej's Workspace</h1>
+      <p class="workspace-tagline">Your private universe of thoughts, habits &amp; ideas</p>
+    </div>
+
+    <div class="books-grid">
+      <!-- Gratitude Book -->
+      <div class="book-card book-gratitude" onclick="openSection('gratitude')" role="button" aria-label="Open Gratitude Book">
+        <div class="book-card-inner">
+          <span class="book-count-badge" id="badge-gratitude">0 entries</span>
+          <span class="book-icon">🌼</span>
+          <div class="book-label">Gratitude Book</div>
+          <div class="book-desc">Count your blessings, shift your lens</div>
+        </div>
+      </div>
+
+      <!-- Habit Tracker -->
+      <div class="book-card book-habit" onclick="openSection('habit')" role="button" aria-label="Open Habit Tracker">
+        <div class="book-card-inner">
+          <span class="book-count-badge" id="badge-habit">0 habits</span>
+          <span class="book-icon">✅</span>
+          <div class="book-label">Habit Tracker</div>
+          <div class="book-desc">Build streaks, break limits</div>
+        </div>
+      </div>
+
+      <!-- Ideas Book -->
+      <div class="book-card book-ideas" onclick="openSection('ideas')" role="button" aria-label="Open Ideas Book">
+        <div class="book-card-inner">
+          <span class="book-count-badge" id="badge-ideas">0 ideas</span>
+          <span class="book-icon">💡</span>
+          <div class="book-label">Ideas Book</div>
+          <div class="book-desc">Capture every spark before it fades</div>
+        </div>
+      </div>
+
+      <!-- Research Book -->
+      <div class="book-card book-research" onclick="openSection('research')" role="button" aria-label="Open Research Book">
+        <div class="book-card-inner">
+          <span class="book-count-badge" id="badge-research">0 topics</span>
+          <span class="book-icon">🔬</span>
+          <div class="book-label">Research Book</div>
+          <div class="book-desc">Deep dives &amp; knowledge threads</div>
+        </div>
+      </div>
+
+      <!-- Personal Diary -->
+      <div class="book-card book-diary" onclick="openSection('diary')" role="button" aria-label="Open Personal Diary">
+        <div class="book-card-inner">
+          <span class="book-count-badge" id="badge-diary">0 days</span>
+          <span class="book-icon">📔</span>
+          <div class="book-label">Personal Diary</div>
+          <div class="book-desc">Your story, your words, your truth</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== GRATITUDE SECTION ========== -->
+  <div id="page-gratitude" class="page">
+    <div class="section-page">
+      <div class="section-header">
+        <span class="section-icon">🌼</span>
+        <div>
+          <div class="section-title">Gratitude Book</div>
+          <div class="section-subtitle">What are you grateful for today?</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="section-label">New Entry</div>
+        <textarea id="gratitude-input" placeholder="Write something you're grateful for today…" rows="4"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;gap:0.5rem;">
+          <button class="btn btn-primary" onclick="saveGratitude()">Save Entry ✦</button>
+        </div>
+      </div>
+
+      <div class="section-label" id="gratitude-list-label" style="display:none;">Past Entries</div>
+      <div class="entries-list" id="gratitude-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== HABIT TRACKER SECTION ========== -->
+  <div id="page-habit" class="page habit-section">
+    <div class="section-page">
+      <div class="section-header">
+        <span class="section-icon">✅</span>
+        <div>
+          <div class="section-title">Habit Tracker</div>
+          <div class="section-subtitle">Small daily wins lead to big transformations</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-section">
+        <div class="progress-header">
+          <span>Today's Progress</span>
+          <span class="progress-pct" id="habit-pct">0%</span>
+        </div>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" id="habit-bar" style="width:0%"></div>
+        </div>
+        <div style="font-size:0.8rem;color:var(--section-muted);margin-top:0.5rem;" id="habit-summary">No habits yet</div>
+      </div>
+
+      <!-- Add habit -->
+      <div class="input-area">
+        <div class="section-label" style="color:var(--section-muted)">Add New Habit</div>
+        <div class="input-row">
+          <input type="text" id="habit-input" placeholder="e.g. Morning meditation, Drink 2L water…" style="flex:1;">
+          <button class="btn btn-primary" onclick="addHabit()">Add</button>
+        </div>
+      </div>
+
+      <div class="section-label" style="color:var(--section-muted)">Today's Habits</div>
+      <div class="habits-list" id="habits-list">
+        <div class="empty-state">
+          <span class="empty-state-icon">🌸</span>
+          No habits yet — add your first one above!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== IDEAS BOOK SECTION ========== -->
+  <div id="page-ideas" class="page">
+    <div class="section-page">
+      <div class="section-header">
+        <span class="section-icon">💡</span>
+        <div>
+          <div class="section-title">Ideas Book</div>
+          <div class="section-subtitle">Every big thing started as a small idea</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="section-label">Capture an Idea</div>
+        <div class="input-row" style="margin-bottom:0.75rem;">
+          <input type="text" id="idea-tag-input" placeholder="Category / tag (optional)" style="flex:1;max-width:200px;">
+        </div>
+        <textarea id="idea-input" placeholder="Describe your idea…" rows="3"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;">
+          <button class="btn btn-primary" onclick="saveIdea()">Pin Idea ✦</button>
+        </div>
+      </div>
+
+      <div class="section-label" id="ideas-list-label" style="display:none;">Your Ideas</div>
+      <div class="ideas-grid" id="ideas-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== RESEARCH BOOK SECTION ========== -->
+  <div id="page-research" class="page">
+    <div class="section-page">
+      <div class="section-header">
+        <span class="section-icon">🔬</span>
+        <div>
+          <div class="section-title">Research Book</div>
+          <div class="section-subtitle">Structured notes for deep exploration</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="section-label">New Research Topic</div>
+        <input type="text" id="research-topic" placeholder="Topic / title…" style="margin-bottom:0.6rem;">
+        <textarea id="research-notes" placeholder="Notes, links, key findings…" rows="5"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;">
+          <button class="btn btn-primary" onclick="saveResearch()">Save Research ✦</button>
+        </div>
+      </div>
+
+      <div class="section-label" id="research-list-label" style="display:none;">Research Entries</div>
+      <div id="research-list"></div>
+    </div>
+  </div>
+
+  <!-- ========== PERSONAL DIARY SECTION ========== -->
+  <div id="page-diary" class="page">
+    <div class="section-page">
+      <div class="section-header">
+        <span class="section-icon">📔</span>
+        <div>
+          <div class="section-title">Personal Diary</div>
+          <div class="section-subtitle">One entry per day, forever yours</div>
+        </div>
+      </div>
+
+      <div class="input-area">
+        <div class="section-label">Write Today's Entry</div>
+        <div class="input-row" style="margin-bottom:0.75rem;">
+          <input type="date" id="diary-date" style="max-width:200px;">
+        </div>
+        <textarea id="diary-input" placeholder="Dear diary…" rows="7"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:0.75rem;gap:0.5rem;">
+          <button class="btn btn-primary" onclick="saveDiary()">Save Entry ✦</button>
+        </div>
+      </div>
+
+      <div class="section-label" id="diary-nav-label" style="display:none;">Previous Entries</div>
+      <div class="diary-date-nav" id="diary-date-nav"></div>
+      <div id="diary-selected-entry"></div>
+    </div>
+  </div>
+
+</div><!-- /app-wrapper -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== UTILITY ===== */
+const $ = id => document.getElementById(id);
+
+function showToast(msg, duration = 2200) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('visible');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('visible'), duration);
+}
+
+function fmtDate(d) {
+  return new Date(d).toLocaleDateString('en-IN', { weekday:'short', day:'numeric', month:'short', year:'numeric' });
+}
+function nowStr() {
+  return new Date().toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function todayISO() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+/* ===== STORAGE ===== */
+function load(key, def) {
+  try { return JSON.parse(localStorage.getItem(key)) ?? def; } catch { return def; }
+}
+function save(key, val) {
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+/* ===== NAVIGATION ===== */
+let currentSection = 'home';
+
+function openSection(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-' + name).classList.add('active');
+  $('backBtn').classList.add('visible');
+  currentSection = name;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  renderSection(name);
+}
+
+function goHome() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  $('page-home').classList.add('active');
+  $('backBtn').classList.remove('visible');
+  currentSection = 'home';
+  updateBadges();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderSection(name) {
+  if      (name === 'gratitude') renderGratitude();
+  else if (name === 'habit')     renderHabits();
+  else if (name === 'ideas')     renderIdeas();
+  else if (name === 'research')  renderResearch();
+  else if (name === 'diary')     renderDiary();
+}
+
+/* ===== THEME SWITCHER ===== */
+const themes = ['default','slate','forest','rose'];
+function setTheme(theme, el) {
+  themes.forEach(t => document.body.classList.remove('theme-' + t));
+  if (theme !== 'default') document.body.classList.add('theme-' + theme);
+  document.querySelectorAll('.theme-dot').forEach(d => d.classList.remove('active'));
+  el.classList.add('active');
+  save('workspace-theme', theme);
+}
+function loadTheme() {
+  const t = load('workspace-theme', 'default');
+  if (t !== 'default') {
+    document.body.classList.add('theme-' + t);
+    document.querySelector(`[data-theme="${t}"]`)?.classList.add('active');
+    document.querySelector(`[data-theme="default"]`)?.classList.remove('active');
+  }
+}
+
+/* ===== BADGES ===== */
+function updateBadges() {
+  const g = load('gratitude', []);
+  const h = load('habits', []);
+  const i = load('ideas', []);
+  const r = load('research', []);
+  const d = load('diary', {});
+  $('badge-gratitude').textContent = g.length + (g.length === 1 ? ' entry' : ' entries');
+  $('badge-habit').textContent     = h.length + (h.length === 1 ? ' habit' : ' habits');
+  $('badge-ideas').textContent     = i.length + (i.length === 1 ? ' idea' : ' ideas');
+  $('badge-research').textContent  = r.length + (r.length === 1 ? ' topic' : ' topics');
+  const dCount = Object.keys(d).length;
+  $('badge-diary').textContent     = dCount + (dCount === 1 ? ' day' : ' days');
+}
+
+/* ===== GRATITUDE ===== */
+function saveGratitude() {
+  const val = $('gratitude-input').value.trim();
+  if (!val) { showToast('✦ Write something first!'); return; }
+  const entries = load('gratitude', []);
+  entries.unshift({ text: val, date: nowStr(), id: Date.now() });
+  save('gratitude', entries);
+  $('gratitude-input').value = '';
+  renderGratitude();
+  showToast('🌼 Gratitude saved!');
+}
+
+function deleteGratitude(id) {
+  let entries = load('gratitude', []);
+  entries = entries.filter(e => e.id !== id);
+  save('gratitude', entries);
+  renderGratitude();
+}
+
+function renderGratitude() {
+  const entries = load('gratitude', []);
+  const list    = $('gratitude-list');
+  const label   = $('gratitude-list-label');
+  label.style.display = entries.length ? 'block' : 'none';
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🌼</span>No entries yet. What are you grateful for?</div>`;
+    return;
+  }
+  list.innerHTML = entries.map(e => `
+    <div class="entry-card">
+      <div class="entry-meta">${e.date}</div>
+      <div class="entry-text">${escHtml(e.text)}</div>
+      <div class="entry-actions">
+        <button class="btn btn-danger" onclick="deleteGratitude(${e.id})">Delete</button>
+      </div>
+    </div>`).join('');
+  updateBadges();
+}
+
+/* ===== HABITS ===== */
+function addHabit() {
+  const val = $('habit-input').value.trim();
+  if (!val) { showToast('✦ Enter a habit name!'); return; }
+  const habits = load('habits', []);
+  habits.push({ name: val, id: Date.now(), completed: false, streak: 0, lastDone: '' });
+  save('habits', habits);
+  $('habit-input').value = '';
+  renderHabits();
+  showToast('✅ Habit added!');
+}
+
+function toggleHabit(id) {
+  const habits = load('habits', []);
+  const today  = todayISO();
+  const h = habits.find(x => x.id === id);
+  if (!h) return;
+  if (!h.completed) {
+    h.completed = true;
+    if (h.lastDone !== today) {
+      h.streak = (h.lastDone === getPrevDay(today)) ? (h.streak || 0) + 1 : 1;
+      h.lastDone = today;
+    }
+  } else {
+    h.completed = false;
+  }
+  save('habits', habits);
+  renderHabits();
+}
+
+function deleteHabit(id) {
+  let habits = load('habits', []);
+  habits = habits.filter(h => h.id !== id);
+  save('habits', habits);
+  renderHabits();
+}
+
+function getPrevDay(dateStr) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() - 1);
+  return d.toISOString().slice(0, 10);
+}
+
+function renderHabits() {
+  const habits   = load('habits', []);
+  const list     = $('habits-list');
+  const total    = habits.length;
+  const done     = habits.filter(h => h.completed).length;
+  const pct      = total ? Math.round((done / total) * 100) : 0;
+
+  $('habit-pct').textContent  = pct + '%';
+  $('habit-bar').style.width  = pct + '%';
+  $('habit-summary').textContent = total
+    ? `${done} of ${total} habit${total > 1 ? 's' : ''} complete today`
+    : 'No habits yet — add some above!';
+
+  if (!total) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🌸</span>No habits yet — add your first one above!</div>`;
+    updateBadges();
+    return;
+  }
+
+  list.innerHTML = habits.map(h => `
+    <div class="habit-item ${h.completed ? 'completed' : ''}" id="habit-${h.id}">
+      <div class="habit-checkbox" onclick="toggleHabit(${h.id})"></div>
+      <span class="habit-name">${escHtml(h.name)}</span>
+      ${h.streak > 1 ? `<span class="habit-streak">🔥 ${h.streak}d</span>` : ''}
+      <button class="btn btn-danger" onclick="deleteHabit(${h.id})" style="opacity:0.6;margin-left:4px;">✕</button>
+    </div>`).join('');
+  updateBadges();
+}
+
+/* ===== IDEAS ===== */
+function saveIdea() {
+  const text = $('idea-input').value.trim();
+  const tag  = $('idea-tag-input').value.trim() || 'idea';
+  if (!text) { showToast('✦ Write your idea first!'); return; }
+  const ideas = load('ideas', []);
+  ideas.unshift({ text, tag, id: Date.now(), date: nowStr() });
+  save('ideas', ideas);
+  $('idea-input').value = '';
+  $('idea-tag-input').value = '';
+  renderIdeas();
+  showToast('💡 Idea pinned!');
+}
+
+function deleteIdea(id) {
+  let ideas = load('ideas', []);
+  ideas = ideas.filter(i => i.id !== id);
+  save('ideas', ideas);
+  renderIdeas();
+}
+
+function renderIdeas() {
+  const ideas = load('ideas', []);
+  const list  = $('ideas-list');
+  const label = $('ideas-list-label');
+  label.style.display = ideas.length ? 'block' : 'none';
+  if (!ideas.length) {
+    list.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><span class="empty-state-icon">💡</span>No ideas yet — spark your first one!</div>`;
+    updateBadges();
+    return;
+  }
+  list.innerHTML = ideas.map(i => `
+    <div class="idea-card">
+      <div class="idea-card-text">${escHtml(i.text)}</div>
+      <div class="idea-card-footer">
+        <span class="idea-tag">${escHtml(i.tag)}</span>
+        <button class="btn btn-danger" onclick="deleteIdea(${i.id})">✕</button>
+      </div>
+    </div>`).join('');
+  updateBadges();
+}
+
+/* ===== RESEARCH ===== */
+function saveResearch() {
+  const topic = $('research-topic').value.trim();
+  const notes = $('research-notes').value.trim();
+  if (!topic) { showToast('✦ Add a topic!'); return; }
+  if (!notes)  { showToast('✦ Add some notes!'); return; }
+  const entries = load('research', []);
+  entries.unshift({ topic, notes, id: Date.now(), date: nowStr() });
+  save('research', entries);
+  $('research-topic').value = '';
+  $('research-notes').value = '';
+  renderResearch();
+  showToast('🔬 Research saved!');
+}
+
+function deleteResearch(id) {
+  let entries = load('research', []);
+  entries = entries.filter(e => e.id !== id);
+  save('research', entries);
+  renderResearch();
+}
+
+function renderResearch() {
+  const entries = load('research', []);
+  const list    = $('research-list');
+  const label   = $('research-list-label');
+  label.style.display = entries.length ? 'block' : 'none';
+  if (!entries.length) {
+    list.innerHTML = `<div class="empty-state"><span class="empty-state-icon">🔬</span>No research yet — start your first topic!</div>`;
+    updateBadges();
+    return;
+  }
+  list.innerHTML = entries.map(e => `
+    <div class="research-entry">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:0.5rem;">
+        <div class="research-topic">${escHtml(e.topic)}</div>
+        <button class="btn btn-danger" onclick="deleteResearch(${e.id})">Delete</button>
+      </div>
+      <div class="entry-meta">${e.date}</div>
+      <div class="research-notes">${escHtml(e.notes)}</div>
+    </div>`).join('');
+  updateBadges();
+}
+
+/* ===== DIARY ===== */
+function saveDiary() {
+  const dateVal = $('diary-date').value;
+  const text    = $('diary-input').value.trim();
+  if (!dateVal)  { showToast('✦ Pick a date!'); return; }
+  if (!text)     { showToast('✦ Write something first!'); return; }
+  const diary   = load('diary', {});
+  diary[dateVal] = { text, savedAt: nowStr() };
+  save('diary', diary);
+  $('diary-input').value = '';
+  renderDiary();
+  showSelectedDiary(dateVal);
+  showToast('📔 Diary entry saved!');
+}
+
+function renderDiary() {
+  const diary   = load('diary', {});
+  const nav     = $('diary-date-nav');
+  const label   = $('diary-nav-label');
+  const dates   = Object.keys(diary).sort((a, b) => b.localeCompare(a));
+  label.style.display = dates.length ? 'block' : 'none';
+  nav.innerHTML = dates.map(d => `
+    <div class="diary-date-pill" onclick="showSelectedDiary('${d}')">${fmtDate(d)}</div>`
+  ).join('');
+  updateBadges();
+}
+
+function showSelectedDiary(dateStr) {
+  const diary   = load('diary', {});
+  const entry   = diary[dateStr];
+  const el      = $('diary-selected-entry');
+  document.querySelectorAll('.diary-date-pill').forEach(p => {
+    p.classList.toggle('selected', p.textContent === fmtDate(dateStr));
+  });
+  if (!entry) { el.innerHTML = ''; return; }
+  el.innerHTML = `
+    <div class="section-label">${fmtDate(dateStr)}</div>
+    <div class="diary-entry-display">${escHtml(entry.text)}</div>
+    <div style="text-align:right;margin-top:0.5rem;">
+      <button class="btn btn-danger" onclick="deleteDiary('${dateStr}')">Delete this entry</button>
+    </div>`;
+}
+
+function deleteDiary(dateStr) {
+  const diary = load('diary', {});
+  delete diary[dateStr];
+  save('diary', diary);
+  $('diary-selected-entry').innerHTML = '';
+  renderDiary();
+  showToast('Entry deleted');
+}
+
+/* ===== HELPERS ===== */
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+
+/* ===== INIT ===== */
+(function init() {
+  loadTheme();
+  updateBadges();
+  // Set diary date to today
+  $('diary-date').value = todayISO();
+  // Keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && currentSection !== 'home') goHome();
+  });
+})();
+</script>
+</body>
+</html>
