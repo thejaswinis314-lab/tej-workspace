@@ -8,4 +8,4 @@ A personal digital productivity system including:
 - Personal Diary
 
 🔗 Live App:
-https://yourusername.github.io/tej-workspace/# tej-workspace
+https://thejaswinis314-lab.github.io/tej-workspace/# tej-workspace
